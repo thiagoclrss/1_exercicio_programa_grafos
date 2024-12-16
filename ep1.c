@@ -1,22 +1,27 @@
 // 1º Exercício-programa de Grafos
 //Equipe: Edmilson Bernardino Souza, Davison Lucas Mendes Viana e Thiago Colares de Souza
 
+//Em nossa implementação temos um grafo representado por uma lista de arestas com sua origem, destino e custo. 
+//Utilizamos a estrutura de dados union find na seguinte estrutura: pai sendo o representante do conjunto e rank; para formação da árvore geradora de custo mínimo.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-
+//Estrutura representando uma aresta
 struct aresta {
     int origem;
     int destino;
     int custo;
 };
 
+//Estrutura representando a Union Find
 struct unionFind {
     int *pai;      
     int *rank;     
 };
 
+//Inicialização da estrutura union find com o rank de cada conjunto zerado e cada elemento sendo o seu próprio pai/representante do conjunto
 void inicializarUnionFind(struct unionFind *uf, int n) {
     uf->pai = malloc(n * sizeof(int));
     uf->rank = malloc(n * sizeof(int));
@@ -26,6 +31,7 @@ void inicializarUnionFind(struct unionFind *uf, int n) {
     }
 }
 
+//Função para encontrar o representante/pai de determinado conjunto ao qual x é membro
 int encontrar(struct unionFind *uf, int x) {
     if (uf->pai[x] != x) {
         uf->pai[x] = encontrar(uf, uf->pai[x]); 
@@ -33,6 +39,7 @@ int encontrar(struct unionFind *uf, int x) {
     return uf->pai[x];
 }
 
+//Função para unir os conjuntos na estrutura union find
 void unir(struct unionFind *uf, int x, int y) {
     int raizX = encontrar(uf, x);
     int raizY = encontrar(uf, y);
@@ -53,29 +60,33 @@ void liberarUnionFind(struct unionFind *uf) {
     free(uf->rank);
 }
 
+//Função utilizada pela função qsort parar ordenar as arestas por custo em ordem crescente
 int compararPorCusto(const void *a, const void *b) {
     struct aresta *arestaA = (struct aresta *)a;
     struct aresta *arestaB = (struct aresta *)b;
     return arestaA->custo - arestaB->custo;
 }
 
+//Algorítmo de kruskal
 void kruskal(int quantidadeDeVertices, int quantidadeDeArestas, struct aresta *grafo){
     int custoTotal = 0;
     int agmIndex = 0;
     struct aresta *arvoreGeradoraMinima = malloc(sizeof(struct aresta) * (quantidadeDeVertices - 1));
 
+    //Ordenamos de maneira crescente as arestas por custo 
     qsort(grafo, quantidadeDeArestas, sizeof(struct aresta), compararPorCusto);
     
+    //Estrutura Union Find é utilizada na nossa implementação
     struct unionFind uf;
     inicializarUnionFind(&uf, quantidadeDeVertices);
 
-    //construindo a agm
+    //Construindo a árvore geradora mínima
     for (int i = 0; i < quantidadeDeArestas && agmIndex < quantidadeDeVertices - 1; i++) {
         struct aresta arestaAtual = grafo[i];
 
-        // Verifica se a aresta atual forma um ciclo
+        // Verifica se a aresta atual forma um ciclo / Adiciona a aresta à árvore geradora mínima caso não forme ciclo // incrementa o custo 
         if (encontrar(&uf, arestaAtual.origem - 1) != encontrar(&uf, arestaAtual.destino - 1)) {
-            arvoreGeradoraMinima[agmIndex++] = arestaAtual; // Adiciona a aresta à MST
+            arvoreGeradoraMinima[agmIndex++] = arestaAtual; 
             custoTotal += arestaAtual.custo;
             unir(&uf, arestaAtual.origem - 1, arestaAtual.destino - 1);
         }
@@ -124,7 +135,7 @@ int main(){
     
     grafo = malloc(sizeof(struct aresta) * quantidadeDeArestas);
 
-    //Lê o arquivo para capturar as arestas e armazená-las na lista
+    //Lê o arquivo para capturar as arestas e armazená-las no grafo contendo a lista de arestas
     for (int i = 0; i < quantidadeDeArestas; i++){
         fscanf(arquivo, "%d %d %d", 
         &grafo[i].origem, 
@@ -133,7 +144,7 @@ int main(){
     }
 
     fclose(arquivo);
-    
+
     kruskal(quantidadeDeVertices, quantidadeDeArestas, grafo);
 
     free(grafo);
