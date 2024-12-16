@@ -133,7 +133,7 @@ int main(){
     }
 
     fclose(arquivo);
-
+    
     kruskal(quantidadeDeVertices, quantidadeDeArestas, grafo);
 
     free(grafo);
