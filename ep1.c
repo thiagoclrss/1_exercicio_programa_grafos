@@ -113,7 +113,7 @@ int main(){
 
     int quantidadeDeVertices = 0;   	                    
     int quantidadeDeArestas  = 0; 		                    	                			           
-    char caminhoDoArquivo[50];
+    char caminhoDoArquivo[100];
     struct aresta *grafo = NULL;
     
 
